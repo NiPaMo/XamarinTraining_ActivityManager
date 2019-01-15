@@ -6,6 +6,7 @@ using Android.OS;
 using Android.Support.Design.Widget;
 using Android.Support.V4.Content;
 using Android.Support.V7.App;
+using Android.Support.V7.Widget;
 using Android.Views;
 using Android.Views.Animations;
 using Android.Widget;
@@ -22,13 +23,19 @@ namespace ActivityManager.Activities
 
             SetContentView(Resource.Layout.main);
 
-            var activityList = FindViewById<ListView>(Resource.Id.activityList);
+            var recyclerView = FindViewById<RecyclerView>(Resource.Id.activityList);
+
+            var layoutManager = new LinearLayoutManager(this);
+            layoutManager.Orientation = LinearLayoutManager.Vertical;
+
+            recyclerView.SetLayoutManager(layoutManager);
 
             var activityService = new ActivityService();
             var activities = activityService.FetchActivityList();
-            activityList.Adapter = new ActivityAdapter(activities, this);
 
-            activityList.Touch += ListItemTouch;
+            var adapter = new ActivityAdapter(activities);
+
+            recyclerView.SetAdapter(adapter);
 
             if (Build.VERSION.SdkInt >= BuildVersionCodes.Lollipop)
             {
@@ -41,21 +48,6 @@ namespace ActivityManager.Activities
 
             fab.Visibility = ViewStates.Invisible;
 
-        }
-
-        void ListItemTouch(object sender, View.TouchEventArgs e)
-        {
-            var currentNightMode = (int)Resources.Configuration.UiMode & (int)UiMode.NightYes;
-
-            if (currentNightMode == (int)UiMode.NightNo)
-            {
-                Delegate.SetLocalNightMode(AppCompatDelegate.ModeNightYes);
-            }
-            else
-            {
-                Delegate.SetLocalNightMode(AppCompatDelegate.ModeNightNo);
-            }
-            Recreate();
         }
 
         void Fab_Click(object senser, EventArgs e)
